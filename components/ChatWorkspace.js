@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { BACKEND_URL, backendEndpoint } from "../lib/apiConfig";
 import { askJudgments, uploadJudgment } from "../lib/mockApi";
 import { Icon } from "./Icons";
 import UploadModal from "./UploadModal";
@@ -36,15 +37,17 @@ export default function ChatWorkspace() {
   const selectedIds = judgments.map((judgment) => judgment.id);
 
   useEffect(() => {
-    const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    const healthUrl = backendBaseUrl ? `${backendBaseUrl}/health` : "/api/health";
-
     const checkBackend = async () => {
+      if (!BACKEND_URL) {
+        setBackendStatus("disconnected");
+        return;
+      }
+
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 5000);
 
       try {
-        const response = await fetch(healthUrl, {
+        const response = await fetch(backendEndpoint("health"), {
           cache: "no-store",
           signal: controller.signal,
         });

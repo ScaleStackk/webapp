@@ -1,12 +1,20 @@
 # QuestaCase legal research UI
 
-A Next.js App Router application written in JavaScript and styled with Bootstrap.
-Judgment upload is connected server-side to Amazon S3 and Kafka. Chat responses
-remain simulated until the GraphRAG query API is implemented.
+Static Next.js App Router frontend for Firebase Hosting. The browser communicates
+with the EC2 API over HTTPS and uploads judgment PDFs directly to S3 using
+short-lived presigned URLs. AWS credentials, Kafka credentials, and database
+credentials must never be placed in this repository or in `NEXT_PUBLIC_`
+variables.
 
-## Run locally
+## Local development
 
-Requires Node.js 20.9 or newer.
+Requires Node.js 20.9 or newer. Create a local environment file:
+
+```bash
+cp .env.example .env.local
+```
+
+Set `NEXT_PUBLIC_BACKEND_URL` to the EC2 API base URL, then run:
 
 ```bash
 npm install
@@ -15,60 +23,106 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Backend connection indicator
+## Browser-to-backend API contract
 
-The header checks the backend every 15 seconds. During local Next.js development it
-uses `/api/health`. For a Firebase frontend connected to EC2, set the public API base
-URL before building:
+If the configured base URL is `https://api.example.com/api/v1`, the frontend uses
+these endpoints:
+
+### `GET /health`
+
+Returns backend availability:
+
+```json
+{"status":"ok"}
+```
+
+### `POST /uploads/presign`
+
+Request:
+
+```json
+{
+  "filename": "judgment.pdf",
+  "contentType": "application/pdf",
+  "sizeBytes": 123456
+}
+```
+
+Response:
+
+```json
+{
+  "documentId": "server-generated-id",
+  "uploadUrl": "https://bucket.s3.region.amazonaws.com/...signed-query...",
+  "uploadHeaders": {"Content-Type":"application/pdf"},
+  "storage": {"bucket":"private-bucket","key":"judgments/id/source.pdf"}
+}
+```
+
+The browser performs an HTTP `PUT` directly to `uploadUrl`. The EC2 service must
+create a short-lived URL restricted to that object key, content type, and intended
+maximum size. Do not return AWS credentials.
+
+### `POST /judgments`
+
+Called after S3 accepts the PDF. EC2 should verify that the object exists, validate
+its size/type, publish the `judgment.uploaded` Kafka event, and return `202`:
+
+```json
+{
+  "documentId": "server-generated-id",
+  "filename": "judgment.pdf",
+  "sizeBytes": 123456,
+  "etag": "s3-etag",
+  "storage": {"bucket":"private-bucket","key":"judgments/id/source.pdf"}
+}
+```
+
+### `POST /query`
+
+Request:
+
+```json
+{"question":"What was the holding?","judgmentIds":["document-id"]}
+```
+
+Response:
+
+```json
+{
+  "answer": "Evidence-grounded answer",
+  "sources": [
+    {"judgment":"Case name","location":"Page 4"}
+  ]
+}
+```
+
+## CORS and HTTPS
+
+The Firebase page is served over HTTPS, so the EC2 API must also use HTTPS. Its
+CORS policy must allow `https://questacase.web.app`,
+`https://questacase.firebaseapp.com`, and local development only. The S3 bucket
+must allow direct `PUT` requests from the same origins; a starting configuration
+is provided in `s3-cors.example.json`.
+
+CORS is not authentication. Protect the public EC2 API with suitable
+authentication and rate limiting before exposing it beyond a controlled demo.
+
+## Build and deploy to Firebase
+
+`NEXT_PUBLIC_BACKEND_URL` is embedded at build time. Set it in `.env.production`
+or in the build environment:
 
 ```bash
-NEXT_PUBLIC_BACKEND_URL=https://api.example.com
+NEXT_PUBLIC_BACKEND_URL=https://api.example.com/api/v1 npm run build
 ```
 
-The EC2 backend must expose `GET /health` and return JSON containing
-`{"status":"ok"}`. This public variable contains only the API URL; never place AWS
-credentials or other secrets in a `NEXT_PUBLIC_` variable.
-
-## S3 and Kafka connection
-
-Copy `aws_conn.example.json` to the git-ignored `aws_conn.json` and configure:
-
-- AWS Region and private S3 bucket;
-- optional local-development AWS credentials;
-- Kafka broker addresses and `judgment.uploaded` topic;
-- optional Kafka TLS/SASL authentication.
-
-On EC2, attach an IAM instance role and leave the AWS key fields empty. The role
-needs `s3:PutObject` permission for the configured judgment prefix. Never expose
-`aws_conn.json` to the browser or commit it to Git.
-
-The server accepts `POST /api/judgments` with a multipart field named
-`judgment`. It validates the PDF, computes a SHA-256 document ID, uploads to:
-
-```text
-s3://BUCKET/judgments/DOCUMENT_ID/source.pdf
-```
-
-It then publishes a `judgment.uploaded` JSON event containing metadata and the S3
-URI. The PDF itself is never placed on Kafka. A successful request returns HTTP
-`202 Accepted` because KG and embedding processing happen asynchronously.
-
-Set `AWS_CONN_FILE` to an absolute path if the connection file is mounted outside
-the application directory:
+The static site is generated in `out/`. The repository is configured for Firebase
+project `questacase`:
 
 ```bash
-AWS_CONN_FILE=/run/secrets/aws_conn.json npm start
+npm run deploy:firebase
 ```
 
-For local development, credentials can also come from the standard AWS SDK
-environment/profile chain; explicit keys in the JSON are optional.
-
-## Remaining backend integration
-
-The upload function in `lib/mockApi.js` now calls the live upload route. The
-remaining `askJudgments()` function should later call the retrieval and answer
-endpoint and return page-level sources.
-
-The current upload route buffers files in application memory and caps them at
-50 MB. This is suitable for the demonstration. A production version should use
-presigned multipart S3 uploads for larger files or higher upload concurrency.
+Firebase runs `npm run build` automatically before deployment. The Firebase CLI
+must already be installed and authenticated; this project does not install it.

@@ -8,12 +8,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "deploy:firebase": "firebase deploy --only hosting"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1161.0",
     "bootstrap": "latest",
-    "kafkajs": "2.2.4",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
