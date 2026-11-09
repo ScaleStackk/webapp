@@ -37,6 +37,14 @@ export default function ChatWorkspace() {
   const selectedIds = judgments.map((judgment) => judgment.id);
 
   useEffect(() => {
+    const parameters = new URLSearchParams(window.location.search);
+    if (parameters.get("upload") === "true") {
+      setUploadOpen(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     const checkBackend = async () => {
       if (!BACKEND_URL) {
         setBackendStatus("disconnected");
@@ -139,27 +147,6 @@ export default function ChatWorkspace() {
 
   return (
     <main className="search-app">
-      <header className="search-header">
-        <button
-          aria-label="QuestaCase home"
-          className="questacase-brand"
-          onClick={() => {
-            setMessages(STARTER_MESSAGES);
-            setQuestion("");
-          }}
-          type="button"
-        >
-          <span className="questacase-icon"><Icon name="scales" size={21} /></span>
-          <span>Questa<span>Case</span></span>
-        </button>
-
-        <div className="search-header-actions">
-          <button className="corner-upload" onClick={() => setUploadOpen(true)} type="button">
-            <Icon name="upload" size={17} /> <span>Upload judgment</span>
-          </button>
-        </div>
-      </header>
-
       <section className="search-stage">
         <div className="search-orb search-orb-one" />
         <div className="search-orb search-orb-two" />
@@ -246,10 +233,6 @@ export default function ChatWorkspace() {
           </div>
         </section>
       )}
-
-      <footer className="search-footer">
-        Legal Research Assistant
-      </footer>
 
       <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUpload={handleUpload} />
 

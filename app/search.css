@@ -6,19 +6,6 @@
   padding-bottom: 48px;
 }
 
-.search-header {
-  align-items: center;
-  display: flex;
-  height: 76px;
-  justify-content: space-between;
-  left: 0;
-  padding: 0 34px;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 20;
-}
-
 .questacase-brand {
   align-items: center;
   background: transparent;
@@ -43,7 +30,6 @@
   width: 39px;
 }
 
-.search-header-actions { align-items: center; display: flex; gap: 12px; }
 .backend-status {
   align-items: center;
   background: rgba(255, 255, 255, .72);
@@ -70,22 +56,6 @@
 .backend-status.is-disconnected .backend-status-dot { background: #c7655e; box-shadow: 0 0 0 3px rgba(199, 101, 94, .14); }
 .backend-status.is-checking .backend-status-dot { animation: statusPulse 1.2s ease-in-out infinite; }
 @keyframes statusPulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
-.corner-upload {
-  align-items: center;
-  background: var(--navy);
-  border: 0;
-  border-radius: 9px;
-  box-shadow: 0 7px 20px rgba(17, 28, 47, .12);
-  color: #fff;
-  display: flex;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 8px;
-  padding: 10px 14px;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.corner-upload:hover { box-shadow: 0 10px 25px rgba(17, 28, 47, .18); transform: translateY(-1px); }
-
 .search-stage {
   align-items: center;
   background:
@@ -171,27 +141,9 @@
 .search-loading span:nth-child(3) { animation-delay: .3s; }
 @keyframes searchPulse { 0%, 70%, 100% { opacity: .25; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-4px); } }
 
-.search-footer {
-  background: rgba(255, 255, 255, .96);
-  border-top: 1px solid #ecece8;
-  bottom: 0;
-  color: #667161;
-  font-size: 11px;
-  font-weight: 600;
-  left: 0;
-  padding: 15px 24px;
-  position: fixed;
-  right: 0;
-  text-align: center;
-  z-index: 30;
-}
-
 @media (max-width: 700px) {
-  .search-header { height: 68px; padding: 0 16px; }
   .backend-status { padding: 7px; }
   .backend-status > span:last-child { display: none; }
-  .corner-upload { padding: 10px; }
-  .corner-upload span { display: none; }
   .search-stage { min-height: 670px; padding: 100px 16px 45px; }
   .legal-search { gap: 12px; }
   .legal-search input { font-size: 13px; }

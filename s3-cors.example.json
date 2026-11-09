@@ -1,0 +1,13 @@
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["PUT"],
+    "AllowedOrigins": [
+      "https://questacase.web.app",
+      "https://questacase.firebaseapp.com",
+      "http://localhost:3000"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]

@@ -1,6 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import "./search.css";
+import "./info.css";
+import SiteFooter from "../components/SiteFooter";
+import SiteHeader from "../components/SiteHeader";
 
 export const metadata = {
   title: "QuestaCase | Legal Research Assistant",
@@ -10,7 +13,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }
