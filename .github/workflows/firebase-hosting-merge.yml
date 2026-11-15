@@ -6,12 +6,27 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: true
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_BACKEND_URL: https://16-112-144-126.sslip.io/api/v1
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
