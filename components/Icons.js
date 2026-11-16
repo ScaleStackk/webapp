@@ -6,6 +6,16 @@ export function Icon({ name, size = 20, strokeWidth = 1.8, className = "" }) {
         <path d="M2.5 12c.4 2 1.2 3 2.5 3s2.1-1 2.5-3M16.5 12c.4 2 1.2 3 2.5 3s2.1-1 2.5-3" />
       </>
     ),
+    graph: (
+      <>
+        <path d="m10.4 10.7-3.5-3.2m6.7 3.2 3.5-3.2m-6.8 5.8-3.7 3.1m7.1-3.1 3.7 3.1" />
+        <circle cx="12" cy="12" r="2.4" />
+        <circle cx="5.5" cy="6.2" r="1.8" />
+        <circle cx="18.5" cy="6.2" r="1.8" />
+        <circle cx="5.2" cy="17.8" r="1.8" />
+        <circle cx="18.8" cy="17.8" r="1.8" />
+      </>
+    ),
     upload: (
       <>
         <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />

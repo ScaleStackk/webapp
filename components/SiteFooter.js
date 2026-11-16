@@ -1,3 +1,3 @@
 export default function SiteFooter() {
-  return <footer className="site-footer">Legal Research Assistant</footer>;
+  return <footer className="site-footer">Data Engineering at Scale Project</footer>;
 }

@@ -33,8 +33,12 @@ export default function ChatWorkspace() {
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState("");
   const [backendStatus, setBackendStatus] = useState("checking");
+  const [retrieval, setRetrieval] = useState({ vector: true, graph: true });
+  const inputRef = useRef(null);
+  const requestAbortRef = useRef(null);
+  const requestIdRef = useRef(0);
   const resultEndRef = useRef(null);
-  const selectedIds = judgments.map((judgment) => judgment.id);
+  const canSearch = judgments.length > 0;
 
   useEffect(() => {
     const parameters = new URLSearchParams(window.location.search);
@@ -106,44 +110,72 @@ export default function ChatWorkspace() {
     setToast("Judgment uploaded and queued for processing");
   };
 
+  const toggleRetrieval = (name) => {
+    setRetrieval((current) => {
+      const other = name === "vector" ? "graph" : "vector";
+      if (current[name] && !current[other]) return current;
+      return { ...current, [name]: !current[name] };
+    });
+  };
+
   const submitQuestion = async (text = question) => {
     const trimmed = text.trim();
-    if (!trimmed || sending || selectedIds.length === 0) return;
+    if (!trimmed || sending || !canSearch || backendStatus !== "connected") return;
 
-    const userMessage = {
-      id: `message-${Date.now()}`,
-      role: "user",
-      content: trimmed,
-      sources: [],
-    };
-    setMessages((current) => [...current, userMessage]);
-    setQuestion("");
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    const controller = new AbortController();
+    requestAbortRef.current = controller;
+
+    setMessages(STARTER_MESSAGES);
+    setQuestion(trimmed);
     setSending(true);
 
     try {
       const response = await askJudgments({
         question: trimmed,
-        judgmentIds: selectedIds,
+        judgmentIds: [],
+        retrieval,
         judgments,
+        signal: controller.signal,
       });
-      setMessages((current) => [...current, response]);
-    } catch {
-      setMessages((current) => [
-        ...current,
-        {
-          id: `message-${Date.now()}`,
-          role: "assistant",
-          content: "I could not complete that search. Please try again.",
-          sources: [],
-          error: true,
-        },
-      ]);
+      if (requestIdRef.current === requestId) {
+        setMessages([STARTER_MESSAGES[0], response]);
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError" && requestIdRef.current === requestId) {
+        setMessages([
+          STARTER_MESSAGES[0],
+          {
+            id: `message-${Date.now()}`,
+            role: "assistant",
+            content: "I could not complete that search. Please try again.",
+            sources: [],
+            error: true,
+          },
+        ]);
+      }
     } finally {
-      setSending(false);
+      if (requestIdRef.current === requestId) {
+        requestAbortRef.current = null;
+        setSending(false);
+      }
     }
   };
 
-  const searchResults = messages.filter((message) => message.id !== "welcome");
+  const resetSearch = () => {
+    requestIdRef.current += 1;
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
+    setSending(false);
+    setMessages(STARTER_MESSAGES);
+    setQuestion("");
+    window.requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const searchResults = messages.filter((message) => message.role === "assistant" && message.id !== "welcome");
+  const hasResponse = searchResults.length > 0;
+  const searchLocked = sending || hasResponse;
 
   return (
     <main className="search-app">
@@ -151,88 +183,104 @@ export default function ChatWorkspace() {
         <div className="search-orb search-orb-one" />
         <div className="search-orb search-orb-two" />
         <div className="search-home">
-          <span className="search-eyebrow"><Icon name="sparkle" size={14} /> Evidence-grounded legal research</span>
-
           <form
-            className={`legal-search ${selectedIds.length === 0 ? "is-disabled" : ""}`}
+            className={`legal-search ${!canSearch || searchLocked ? "is-disabled" : ""}`}
             onSubmit={(event) => {
               event.preventDefault();
               submitQuestion();
             }}
           >
-            <span
-              aria-live="polite"
-              className={`backend-status is-${backendStatus}`}
-              title={`Backend ${backendStatus}`}
-            >
-              <span className="backend-status-dot" />
-              <span>Backend {backendStatus}</span>
-            </span>
+            <div className="retrieval-controls" role="group" aria-label="Query evidence sources">
+              <span>Use</span>
+              <button
+                aria-pressed={retrieval.vector}
+                disabled={searchLocked || (retrieval.vector && !retrieval.graph)}
+                onClick={() => toggleRetrieval("vector")}
+                type="button"
+              >
+                <span className="retrieval-switch" aria-hidden="true"><span /></span>
+                Embeddings
+              </button>
+              <button
+                aria-pressed={retrieval.graph}
+                disabled={searchLocked || (retrieval.graph && !retrieval.vector)}
+                onClick={() => toggleRetrieval("graph")}
+                type="button"
+              >
+                <span className="retrieval-switch" aria-hidden="true"><span /></span>
+                Knowledge graph
+              </button>
+            </div>
             <div className="search-input-shell">
               <Icon name="search" size={23} />
               <input
                 aria-label="Search selected judgments"
                 autoComplete="off"
-                disabled={selectedIds.length === 0}
+                disabled={!canSearch || searchLocked}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder={selectedIds.length ? "Ask a question about the law or the judgments…" : "Upload a judgment to search"}
+                placeholder={canSearch ? "Ask a question about the law or the judgments…" : "Upload a judgment to search"}
+                ref={inputRef}
                 type="search"
                 value={question}
               />
             </div>
-            <button className="search-submit" disabled={!question.trim() || sending || selectedIds.length === 0} type="submit">
-              <Icon name="search" size={17} /> Search
-            </button>
+            {!hasResponse && (
+              sending ? (
+                <button className="search-submit is-cancel" onClick={resetSearch} type="button">
+                  <Icon name="close" size={17} /> Cancel
+                </button>
+              ) : (
+                <button
+                  className="search-submit"
+                  disabled={backendStatus !== "connected" || !question.trim() || !canSearch}
+                  type="submit"
+                >
+                  {backendStatus === "connected" ? (
+                    <><Icon name="search" size={17} /> Search</>
+                  ) : "Backend Disconnected"}
+                </button>
+              )
+            )}
+            {sending && (
+              <div className="inline-search-status" role="status">
+                <span>Finding the answer…</span>
+                <div className="search-loading" aria-hidden="true"><span /><span /><span /></div>
+              </div>
+            )}
+
+            {searchResults.map((message, index) => (
+              <article className={`inline-answer-box ${message.error ? "has-error" : ""}`} key={message.id} aria-live="polite">
+                <div className="answer-label"><span><Icon name="scales" size={15} /></span> Answer</div>
+                <p>{message.content}</p>
+                {message.sources?.length > 0 && (
+                  <div className="result-sources">
+                    <span>Sources</span>
+                    {message.sources.map((source, sourceIndex) => (
+                      <button
+                        className="result-source"
+                        key={source.chunkId || `${source.documentId || source.judgment}-${source.location}-${sourceIndex}`}
+                        type="button"
+                      >
+                        <Icon name="file" size={16} />
+                        <span><strong>{source.judgment}</strong><small>{source.location}</small></span>
+                        <Icon name="chevron" size={14} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {message.isMock && <small className="result-demo-label">Demonstration response</small>}
+                {index === searchResults.length - 1 && (
+                  <button className="answer-done" onClick={resetSearch} type="button">
+                    <Icon name="check" size={16} /> Done
+                  </button>
+                )}
+              </article>
+            ))}
+            <div ref={resultEndRef} />
           </form>
 
         </div>
       </section>
-
-      {(searchResults.length > 0 || sending) && (
-        <section className="search-results" aria-live="polite">
-          <div className="results-heading">
-            <span>Research results</span>
-            <button onClick={() => setMessages(STARTER_MESSAGES)} type="button">Clear results</button>
-          </div>
-
-          <div className="result-stream">
-            {searchResults.map((message) =>
-              message.role === "user" ? (
-                <article className="result-query" key={message.id}>
-                  <span><Icon name="search" size={18} /></span>
-                  <h2>{message.content}</h2>
-                </article>
-              ) : (
-                <article className={`answer-result ${message.error ? "has-error" : ""}`} key={message.id}>
-                  <div className="answer-label"><span><Icon name="scales" size={15} /></span> Answer</div>
-                  <p>{message.content}</p>
-                  {message.sources?.length > 0 && (
-                    <div className="result-sources">
-                      <span>Sources</span>
-                      {message.sources.map((source) => (
-                        <button className="result-source" key={`${source.judgment}-${source.location}`} type="button">
-                          <Icon name="file" size={16} />
-                          <span><strong>{source.judgment}</strong><small>{source.location}</small></span>
-                          <Icon name="chevron" size={14} />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {message.isMock && <small className="result-demo-label">Demonstration response</small>}
-                </article>
-              ),
-            )}
-
-            {sending && (
-              <article className="answer-result is-loading">
-                <div className="answer-label"><span><Icon name="scales" size={15} /></span> Searching judgments</div>
-                <div className="search-loading"><span /><span /><span /></div>
-              </article>
-            )}
-            <div ref={resultEndRef} />
-          </div>
-        </section>
-      )}
 
       <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUpload={handleUpload} />
 

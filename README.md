@@ -83,8 +83,15 @@ its size/type, publish the `judgment.uploaded` Kafka event, and return `202`:
 Request:
 
 ```json
-{"question":"What was the holding?","judgmentIds":["document-id"]}
+{
+  "question": "What was the holding?",
+  "judgmentIds": ["document-id"],
+  "retrieval": {"vector": true, "graph": true}
+}
 ```
+
+The two retrieval flags control querying only; ingestion always populates both
+Qdrant and Neo4j. At least one retrieval mode must remain enabled.
 
 Response:
 

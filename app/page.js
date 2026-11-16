@@ -1,5 +1,4 @@
-import ChatWorkspace from "../components/ChatWorkspace";
+import ProjectPage, { metadata } from "./project/page";
 
-export default function Home() {
-  return <ChatWorkspace />;
-}
+export { metadata };
+export default ProjectPage;

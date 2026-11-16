@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Caslon+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
   --ink: #152238;
@@ -26,7 +26,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 .app-shell { display: flex; height: 100vh; min-height: 680px; overflow: hidden; }
@@ -112,7 +112,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .research-intro { border-bottom: 1px solid var(--line); margin-bottom: 28px; padding: 2px 0 30px; position: relative; }
 .intro-icon { align-items: center; background: #e7f3d5; border: 1px solid #d6e7bb; border-radius: 12px; color: var(--accent-dark); display: flex; height: 48px; justify-content: center; margin-bottom: 19px; width: 48px; }
 .eyebrow { color: #73805f; display: block; font-size: 10px; font-weight: 700; letter-spacing: .12em; margin-bottom: 8px; text-transform: uppercase; }
-.research-intro h2 { font-family: "Libre Caslon Display", Georgia, serif; font-size: clamp(28px, 4vw, 39px); letter-spacing: -.025em; line-height: 1.1; margin: 0 0 12px; }
+.research-intro h2 { font-family: inherit; font-size: clamp(28px, 4vw, 39px); letter-spacing: -.025em; line-height: 1.1; margin: 0 0 12px; }
 .research-intro p { color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin: 0; max-width: 600px; }
 
 .messages { display: flex; flex-direction: column; gap: 23px; }
@@ -159,7 +159,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .modal-layer { align-items: center; background: rgba(10,18,31,.66); display: flex; inset: 0; justify-content: center; padding: 22px; position: fixed; z-index: 100; }
 .upload-modal { background: var(--surface); border-radius: 17px; box-shadow: var(--shadow); max-width: 550px; padding: 28px; width: 100%; }
 .modal-heading { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 21px; }
-.modal-heading h2 { font-family: "Libre Caslon Display", Georgia, serif; font-size: 29px; margin: 0 0 6px; }
+.modal-heading h2 { font-family: inherit; font-size: 29px; margin: 0 0 6px; }
 .modal-heading p { color: var(--ink-soft); font-size: 13px; margin: 0; }
 .modal-heading .eyebrow { margin-bottom: 5px; }
 .drop-zone { align-items: center; background: #fafbf8; border: 1.5px dashed #bfc9b3; border-radius: 12px; color: var(--ink); display: flex; flex-direction: column; padding: 31px 20px; transition: border .15s ease, background .15s ease; width: 100%; }

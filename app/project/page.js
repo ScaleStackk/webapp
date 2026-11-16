@@ -1,47 +1,48 @@
 export const metadata = {
-  title: "Project Rationale | QuestaCase",
-  description: "The problem statement and design rationale behind QuestaCase.",
+  title: "Project Aim | QuestaCase",
+  description: "The aim and real-world applications of the distributed information platform.",
 };
 
-const choices = [
-  ["S3", "Keeps every original judgment durable and recoverable."],
-  ["Kafka", "Lets graph and embedding workers process the same upload independently."],
-  ["Neo4j + Qdrant", "Combines explicit legal relationships with semantic passage search."],
-  ["Small local models", "Keeps inference affordable while preserving privacy and control."],
+const useCases = [
+  ["Enterprise knowledge", "Detect similar projects, surface reusable work and reduce duplicated development across teams."],
+  ["News intelligence", "Continuously ingest reports and connect developing events, organisations, people and locations."],
+  ["Social media tracking", "Follow activity and emerging themes across high-volume, rapidly changing social streams."],
+  ["Operational monitoring", "Combine logs, incidents and reports so teams can retrieve recent context during an event."],
+  ["Research discovery", "Connect papers, experiments and prior findings before new investigation begins."],
+  ["Legal research", "Relate judgments, holdings, cited authorities and legal principles with traceable evidence."],
 ];
 
 export default function ProjectPage() {
   return (
     <main className="info-page">
       <section className="simple-hero">
-        <span>Problem statement</span>
-        <h1>Legal research is more than finding matching words.</h1>
-        <p>Useful answers must connect judgments, holdings, authorities and statutory interpretation—and still point back to the source.</p>
+        <span>Project aim</span>
+        <h1>Distributed real-time information<br />ingestion and retrieval</h1>
+        <p>Continuously capture changing information, process it through independently scalable services, and make both semantic meaning and explicit relationships immediately searchable.</p>
       </section>
 
       <section className="simple-section problem-grid">
-        <article><span>01</span><h2>Judgments are unstructured</h2><p>Important rules are buried inside facts, arguments, procedure and cited cases.</p></article>
-        <article><span>02</span><h2>Meaning is connected</h2><p>A relevant precedent may use different words but address the same legal principle.</p></article>
-        <article><span>03</span><h2>Evidence matters</h2><p>An AI answer is useful only when its claims remain traceable to judgment pages.</p></article>
+        <article><span>01</span><h2>Information keeps arriving</h2><p>Documents, messages, feeds and events are produced faster than teams can organise them manually.</p></article>
+        <article><span>02</span><h2>Context is fragmented</h2><p>Relevant facts may use different words or remain connected only through people, events and references.</p></article>
+        <article><span>03</span><h2>Answers must stay current</h2><p>Retrieval should reflect newly ingested information while remaining traceable to its original evidence.</p></article>
       </section>
 
-      <section className="simple-section choice-section">
+      <section className="simple-section use-case-section">
         <div className="simple-heading">
-          <span>Why this design</span>
-          <h2>Simple components with clear jobs</h2>
+          <span>Example applications</span>
+          <h2>One architecture, many live information domains</h2>
         </div>
-        <div className="choice-list">
-          {choices.map(([name, reason]) => (
-            <article key={name}><strong>{name}</strong><p>{reason}</p></article>
+        <div className="use-case-grid">
+          {useCases.map(([name, description]) => (
+            <article key={name}><strong>{name}</strong><p>{description}</p></article>
           ))}
         </div>
       </section>
 
       <section className="simple-note">
-        <strong>Project focus</strong>
-        <p>This is a distributed data-engineering project using pretrained models—not an attempt to train a new LLM.</p>
+        <strong>Current demonstration</strong>
+        <p>QuestaCase demonstrates the architecture with Supreme Court judgments. A new judgment is stored, distributed to graph and embedding pipelines, indexed in both databases and made available for evidence-grounded retrieval. The legal domain is the test case—not the limit of the platform.</p>
       </section>
-
     </main>
   );
 }
