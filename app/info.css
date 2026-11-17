@@ -16,7 +16,7 @@
 .site-nav a {
   border-radius: 8px;
   color: #657064;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   padding: 9px 12px;
   text-decoration: none;
@@ -278,29 +278,84 @@
 .consideration-grid p { color: #687281; font-size: 12px; line-height: 1.65; margin: 7px 0 0; }
 
 @media (max-width: 760px) {
-  .site-header { grid-template-columns: auto 1fr; height: 68px; padding: 0 14px; }
+  .site-header { display: flex; height: 68px; padding: 0 14px; }
   .questacase-brand > span:last-child { display: none; }
-  .site-header-actions { gap: 4px; }
-  .site-nav { justify-content: flex-end; }
-  .site-nav a { font-size: 10px; padding: 8px 6px; }
-  .site-upload { padding: 10px; }
+  .site-header-actions { gap: 4px; margin-left: auto; }
+  .site-nav { justify-content: flex-end; order: 2; }
+  .site-nav a { font-size: 12px; padding: 8px 7px; }
+  .site-upload { padding: 10px 12px; }
   .site-upload span { display: none; }
+  .site-header-demo .questacase-brand { display: none; }
+  .site-header-demo .site-header-actions { justify-content: space-between; margin-left: 0; width: 100%; }
+  .site-header-demo .site-upload { display: flex; order: 1; }
   .simple-hero { padding: 35px 18px 50px; }
   .simple-section { padding: 35px 18px 58px; }
-  .design-page-heading { margin-bottom: 36px; }
-  .design-page-heading h1 { font-size: 38px; }
+  .design-canvas { padding-left: 12px; padding-right: 12px; }
+  .design-page-heading { margin-bottom: 32px; padding: 0 6px; }
+  .design-page-heading h1 { font-size: 34px; line-height: 1.08; }
+  .design-page-heading p { font-size: 14px; line-height: 1.6; margin-top: 18px; }
   .simple-flow { grid-template-columns: 1fr; }
   .simple-flow > i { text-align: center; transform: rotate(90deg); }
   .simple-flow article { min-height: auto; }
   .simple-explanation, .problem-grid, .choice-section, .use-case-section { gap: 30px; grid-template-columns: 1fr; }
   .use-case-grid { grid-template-columns: 1fr; }
   .system-layout, .consideration-section { grid-template-columns: 1fr; }
-  .cluster-links { height: 70px; min-height: 0; }
-  .cluster-links svg { transform: rotate(90deg); }
-  .ingestion-row { grid-template-columns: 1fr; }
-  .source-worker-arrows { height: 78px; }
+  .system-layout { gap: 0; }
+  .processing-block { border-radius: 16px; padding: 14px; }
+  .system-entry, .retrieval-strip { padding: 14px 15px; }
+  .ingestion-row { gap: 8px; grid-template-columns: 1fr 1fr; }
+  .ingestion-row article, .worker-card, .database-card { padding: 12px; }
+  .ingestion-row article::before, .worker-card::before, .database-card::before { left: 12px; right: 12px; }
+  .source-worker-arrows {
+    align-items: center;
+    color: #60715f;
+    display: flex;
+    flex-direction: column;
+    font-size: 10px;
+    font-weight: 700;
+    height: 66px;
+    justify-content: center;
+    letter-spacing: .04em;
+    padding: 0;
+    text-transform: uppercase;
+  }
+  .source-worker-arrows svg { display: none; }
+  .source-worker-arrows::before { content: "Both sources fan out to both workers"; }
+  .source-worker-arrows::after { content: "↓"; font-size: 22px; font-weight: 400; line-height: 1; margin-top: 4px; }
   .api-entry, .inference-api-entry { margin: 0; }
-  .worker-database-layer { grid-template-columns: 1fr 1fr; }
+  .worker-database-layer {
+    grid-template-areas: "embed qdrant" "neo4j kg";
+    grid-template-columns: 1fr 1fr;
+  }
+  .worker-database-layer > :nth-child(1) { grid-area: embed; }
+  .worker-database-layer > :nth-child(2) { grid-area: qdrant; }
+  .worker-database-layer > :nth-child(3) { grid-area: neo4j; }
+  .worker-database-layer > :nth-child(4) { grid-area: kg; }
+  .worker-card strong, .database-card strong { font-size: 11px; line-height: 1.3; }
+  .worker-card small, .database-card small { font-size: 9.5px; }
+  .cluster-links {
+    align-items: center;
+    color: #60715f;
+    display: flex;
+    flex-direction: column;
+    font-size: 10px;
+    font-weight: 700;
+    height: 72px;
+    justify-content: center;
+    letter-spacing: .04em;
+    min-height: 0;
+    text-transform: uppercase;
+  }
+  .cluster-links svg { display: none; }
+  .cluster-links::before { content: "KG and query inference"; }
+  .cluster-links::after { content: "↓"; font-size: 22px; font-weight: 400; line-height: 1; margin-top: 4px; }
+  .inference-side { border-radius: 16px; padding: 18px 14px; }
+  .inference-stack { grid-template-columns: 1fr; margin-top: 12px; }
+  .haproxy-bar { flex-direction: row; min-height: 48px; padding: 10px 14px; }
+  .haproxy-bar strong, .haproxy-bar small { transform: none; writing-mode: horizontal-tb; }
+  .haproxy-bar small { margin-left: 8px; margin-top: 0; }
+  .inference-side-nodes { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, 1fr); }
+  .inference-side-nodes div { min-height: 48px; padding: 10px 8px; }
   .consideration-grid { grid-template-columns: 1fr; }
   .simple-note { border-radius: 0; margin-bottom: 50px; }
 }

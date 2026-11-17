@@ -13,7 +13,7 @@ export default function SiteHeader() {
       : "aim";
 
   return (
-    <header className="site-header">
+    <header className={`site-header${active === "demo" ? " site-header-demo" : ""}`}>
       <Link aria-label="QuestaCase home" className="questacase-brand" href="/">
         <span className="questacase-icon"><Icon name="graph" size={22} strokeWidth={2} /></span>
         <span>Questa<span>Case</span></span>
