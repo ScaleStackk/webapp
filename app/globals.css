@@ -29,6 +29,16 @@ body {
 button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
+:focus-visible {
+  outline: 3px solid #7da64a;
+  outline-offset: 3px;
+}
+
+.sidebar :focus-visible,
+.message.user :focus-visible {
+  outline-color: var(--accent);
+}
+
 .app-shell { display: flex; height: 100vh; min-height: 680px; overflow: hidden; }
 
 .sidebar {
