@@ -25,6 +25,63 @@ const STARTER_MESSAGES = [
   },
 ];
 
+const TREATMENT_LABELS = {
+  OVERRULES: "Overruled",
+  DISTINGUISHES: "Distinguished",
+  FOLLOWS: "Followed",
+  APPLIES: "Applied",
+  RELIES_ON: "Relied on",
+  REFERRED_TO: "Referred to",
+  CITES: "Cited",
+};
+
+function sourcePage(source) {
+  if (source.page) return Number(source.page);
+  const match = /Page\s+(\d+)/i.exec(source.location || "");
+  return match ? Number(match[1]) : null;
+}
+
+function pdfPageUrl(source) {
+  const page = sourcePage(source);
+  return page ? `${source.pdfUrl}#page=${page}` : source.pdfUrl;
+}
+
+function sourceDetail(source) {
+  const treatment = TREATMENT_LABELS[source.relation];
+  return treatment && source.citedCase
+    ? `${source.location} · ${treatment} ${source.citedCase}`
+    : source.location;
+}
+
+function SourceItem({ source }) {
+  const summary = (
+    <>
+      <Icon name="file" size={16} />
+      <span><strong>{source.judgment}</strong><small>{sourceDetail(source)}</small></span>
+    </>
+  );
+  if (!source.evidence && !source.pdfUrl) {
+    return <div className="result-source">{summary}</div>;
+  }
+  const page = sourcePage(source);
+  return (
+    <details className="result-source is-expandable">
+      <summary>
+        {summary}
+        <Icon name="chevron" size={14} />
+      </summary>
+      <div className="result-source-body">
+        {source.evidence && <blockquote>{source.evidence}</blockquote>}
+        {source.pdfUrl && (
+          <a href={pdfPageUrl(source)} rel="noopener noreferrer" target="_blank">
+            Open PDF{page ? ` at page ${page}` : ""}
+          </a>
+        )}
+      </div>
+    </details>
+  );
+}
+
 export default function ChatWorkspace() {
   const [judgments, setJudgments] = useState([DEMO_JUDGMENT]);
   const [messages, setMessages] = useState(STARTER_MESSAGES);
@@ -252,19 +309,20 @@ export default function ChatWorkspace() {
               <article className={`inline-answer-box ${message.error ? "has-error" : ""}`} key={message.id} aria-live="polite">
                 <div className="answer-label"><span><Icon name="scales" size={15} /></span> Answer</div>
                 <p>{message.content}</p>
+                {message.warnings?.map((warning, warningIndex) => (
+                  <p className="result-warning" key={`${warning.documentId}-${warningIndex}`} role="note">
+                    <strong>{warning.caseLabel}</strong> was overruled by <strong>{warning.overruledBy}</strong>
+                    {warning.page ? ` (page ${warning.page})` : ""}.
+                  </p>
+                ))}
                 {message.sources?.length > 0 && (
                   <div className="result-sources">
                     <span>Sources</span>
                     {message.sources.map((source, sourceIndex) => (
-                      <button
-                        className="result-source"
+                      <SourceItem
                         key={source.chunkId || `${source.documentId || source.judgment}-${source.location}-${sourceIndex}`}
-                        type="button"
-                      >
-                        <Icon name="file" size={16} />
-                        <span><strong>{source.judgment}</strong><small>{source.location}</small></span>
-                        <Icon name="chevron" size={14} />
-                      </button>
+                        source={source}
+                      />
                     ))}
                   </div>
                 )}
