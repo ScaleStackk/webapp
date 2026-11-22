@@ -18,7 +18,7 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_BACKEND_URL: https://16-112-144-126.sslip.io/api/v1
+      NEXT_PUBLIC_BACKEND_URL: https://54-153-145-185.sslip.io/api/v1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
